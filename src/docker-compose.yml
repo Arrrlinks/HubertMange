@@ -1,0 +1,25 @@
+services:
+  payment-service:
+    build: ./services/payment-service
+    ports:
+      - "3007:3000"
+    environment:
+      DB_HOST: payment-db
+      DB_USER: root
+      DB_PASSWORD: example
+      DB_NAME: payment
+    depends_on:
+      - payment-db
+
+  payment-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: payment
+    ports:
+      - "3306:3306"
+    volumes:
+      - payment-data:/var/lib/mysql
+
+volumes:
+  payment-data:
