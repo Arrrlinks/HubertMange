@@ -1,0 +1,95 @@
+(user_auth) {
+    forward_auth user_auth:3000 {
+        uri /user/authenticate
+        copy_headers authorization x-refresh-token x-set-cookie
+    }
+}
+
+(restaurant_auth) {
+    forward_auth restaurant_auth:3000 {
+        uri /restaurant/authenticate
+        copy_headers authorization x-refresh-token x-set-cookie
+    }
+}
+
+(delivery_auth) {
+    forward_auth delivery_auth:3000 {
+        uri /delivery/authenticate
+        copy_headers authorization x-refresh-token x-set-cookie
+    }
+}
+
+(admin_auth) {
+    forward_auth admin_auth:3000 {
+        uri /admin/authenticate
+        copy_headers authorization x-refresh-token x-set-cookie
+    }
+}
+
+:80 {
+    @userAuth path /user/login* /user/register* /user/auth/google* /user/auth/google/callback*
+    handle @userAuth {
+        reverse_proxy user_auth:3000
+        encode gzip zstd
+    }
+
+    handle_path /user/* {
+        import user_auth
+        uri strip_prefix /user
+        reverse_proxy user_frontend:3000 {
+            header_up X-Set-Cookie {http.response.header.X-Set-Cookie}
+        }
+        encode gzip zstd
+    }
+
+
+    @restaurantAuth path /restaurant/login* /restaurant/register* /restaurant/auth/google* /restaurant/auth/google/callback*
+    handle @restaurantAuth {
+        reverse_proxy restaurant_auth:3000
+        encode gzip zstd
+    }
+
+    handle_path /restaurant/* {
+        import restaurant_auth
+        uri strip_prefix /restaurant
+        reverse_proxy restaurant_frontend:3000 {
+            header_up X-Set-Cookie {http.response.header.X-Set-Cookie}
+        }
+        encode gzip zstd
+    }
+
+    @deliveryAuth path /delivery/login* /delivery/register* /delivery/auth/google* /delivery/auth/google/callback*
+    handle @deliveryAuth {
+        reverse_proxy delivery_auth:3000
+        encode gzip zstd
+    }
+
+    handle_path /delivery/* {
+        import delivery_auth
+        uri strip_prefix /delivery
+        reverse_proxy delivery_frontend:3000 {
+            header_up X-Set-Cookie {http.response.header.X-Set-Cookie}
+        }
+        encode gzip zstd
+    }
+
+    @adminAuth path /admin/login*
+    handle @adminAuth {
+        reverse_proxy admin_auth:3000
+        encode gzip zstd
+    }
+
+    handle_path /admin/* {
+        import admin_auth
+        uri strip_prefix /admin
+        reverse_proxy admin_frontend:3000 {
+            header_up X-Set-Cookie {http.response.header.X-Set-Cookie}
+        }
+        encode gzip zstd
+    }
+
+    handle {
+        reverse_proxy main_frontend:3000
+        encode gzip zstd
+    }
+}
