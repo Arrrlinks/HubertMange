@@ -157,6 +157,15 @@ services:
     volumes:
       - openroute-data:/var/lib/mysql
 
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend/src/payment/public:/app
+    command: npx http-server -p 8080
+    ports:
+      - "8080:8080"
+
 volumes:
   auth-data:
   customer-data:

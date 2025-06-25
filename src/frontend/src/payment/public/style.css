@@ -1,0 +1,140 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.card-form-container {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+}
+
+#payment-form h1 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #32325d;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.field {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+#submit-button {
+    background-color: #6772e5;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#submit-button:hover {
+    background-color: #5469d4;
+}
+
+#submit-button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.stripe-logo {
+    height: 32px;
+}
+
+.card-icons img {
+    height: 28px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.error-message {
+    color: #e53e3e;
+    font-size: 13px;
+    margin-top: 4px;
+    min-height: 18px;
+}
+
+.success-message {
+    color: #38a169;
+    background: #e6fffa;
+    border: 1px solid #38a169;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 18px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #fff;
+    border-top: 2px solid #6772e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 500px) {
+    .card-form-container {
+        width: 95vw;
+        padding: 15px;
+    }
+    .brand-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
