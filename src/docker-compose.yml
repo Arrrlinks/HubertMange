@@ -1,168 +1,20 @@
 version: '3.8'
 
 services:
-  auth-service:
-    build: ./services/auth-service
+  frontend:
+    build:
+      context: ./frontend/frontend-client  # Chemin relatif depuis src/
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
-      DB_HOST: auth-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: auth
-    depends_on:
-      - auth-db
-
-  customer-service:
-    build: ./services/customer-service
-    ports:
-      - "4000:4000"
-    environment:
-      DB_HOST: customer-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: customer
-    depends_on:
-      - customer-db
-
-  delivery-service:
-    build: ./services/delivery-service
-    ports:
-      - "5000:5000"
-    environment:
-      DB_HOST: delivery-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: delivery
-    depends_on:
-      - delivery-db
-
-  restaurant-service:
-    build: ./services/restaurant-service
-    ports:
-      - "6000:6000"
-    environment:
-      DB_URL: mongodb://restaurant-db:27017/restaurant
-    depends_on:
-      - restaurant-db
-
-  admin-service:
-    build: ./services/admin-service
-    ports:
-      - "7000:7000"
-    environment:
-      DB_HOST: admin-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: admin
-    depends_on:
-      - admin-db
-
-  order-service:
-    build: ./services/order-service
-    ports:
-      - "8000:8000"
-    environment:
-      DB_HOST: order-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: order
-    depends_on:
-      - order-db
-
-  payment-service:
-    build: ./services/payment-service
-    ports:
-      - "9000:9000"
-    environment:
-      DB_HOST: payment-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: payment
-    depends_on:
-      - payment-db
-
-  openroute-service:
-    build: ./services/openroute-service
-    ports:
-      - "10000:10000"
-    environment:
-      DB_HOST: openroute-db
-      DB_USER: root
-      DB_PASSWORD: example
-      DB_NAME: openroute
-    depends_on:
-      - openroute-db
-
-  auth-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: auth
+      - VITE_API_URL=http://localhost:3001
     volumes:
-      - auth-data:/var/lib/mysql
+      - ./frontend/frontend-client:/app
+      - /app/node_modules
+    networks:
+      - frontend-network
 
-  customer-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: customer
-    volumes:
-      - customer-data:/var/lib/mysql
-
-  delivery-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: delivery
-    volumes:
-      - delivery-data:/var/lib/mysql
-
-  restaurant-db:
-    image: mongo:4.4
-    ports:
-      - "27017:27017"
-    volumes:
-      - restaurant-data:/data/db
-
-  admin-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: admin
-    volumes:
-      - admin-data:/var/lib/mysql
-
-  order-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: order
-    volumes:
-      - order-data:/var/lib/mysql
-
-  payment-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: payment
-    volumes:
-      - payment-data:/var/lib/mysql
-
-  openroute-db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: openroute
-    volumes:
-      - openroute-data:/var/lib/mysql
-
-volumes:
-  auth-data:
-  customer-data:
-  delivery-data:
-  restaurant-data:
-  admin-data:
-  order-data:
-  payment-data:
-  openroute-data:
+networks:
+  frontend-network:
+    driver: bridge
