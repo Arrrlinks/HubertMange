@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Utilisateur - Login</title>
+</head>
+<body>
+    <h1>Utilisateur - Login</h1>
+    <form action="/user/login" method="post">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+    <p><a href="/user/register">Register</a></p>
+
+    <form action="/user/auth/google" method="get">
+        <button type="submit">Login with Google</button>
+    </form>
+    <form action="/restaurant/login" method="get">
+        <button type="submit">Se connecter en tant que restaurateur</button>
+    </form>
+    <form action="/delivery/login" method="get">
+        <button type="submit">Se connecter en tant que livreur</button>
+    </form>
+
+</body>
+</html>
