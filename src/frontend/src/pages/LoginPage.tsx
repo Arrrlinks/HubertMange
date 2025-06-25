@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, Mail, Lock } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import logo from '../assets/Group.svg' // adjust if path is different
 
 export default function LoginPage() {
   const { login, register } = useAuth()
@@ -52,9 +53,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-md">
-            <span className="text-black font-bold text-xl">H</span>
-          </div>
+           <img src={logo} alt="Logo" className="w-28 h-12 object-contain" />
           <h2 className="text-3xl font-bold text-black">
             {isLogin ? 'Connexion à HubertManges' : 'Créer votre compte'}
           </h2>
