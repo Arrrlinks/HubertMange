@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   user_auth:
-    build: ./user_auth
+    build: ./src/services/user_auth
     container_name: user_auth
     restart: unless-stopped
     depends_on:
@@ -11,7 +11,7 @@ services:
       - user_network
 
   user_frontend:
-    build: ./user_frontend
+    build: ./src/frontend/user_frontend
     container_name: user_frontend
     restart: unless-stopped
     depends_on:
@@ -33,7 +33,7 @@ services:
       - user_network
 
   restaurant_auth:
-    build: ./restaurant_auth
+    build: ./src/services/restaurant_auth
     container_name: restaurant_auth
     restart: unless-stopped
     depends_on:
@@ -42,7 +42,7 @@ services:
       - restaurant_network
 
   restaurant_frontend:
-    build: ./restaurant_frontend
+    build: ./src/frontend/restaurant_frontend
     container_name: restaurant_frontend
     restart: unless-stopped
     depends_on:
@@ -64,7 +64,7 @@ services:
       - restaurant_network
 
   delivery_auth:
-    build: ./delivery_auth
+    build: ./src/services/delivery_auth
     container_name: delivery_auth
     restart: unless-stopped
     depends_on:
@@ -73,7 +73,7 @@ services:
       - delivery_network
 
   delivery_frontend:
-    build: ./delivery_frontend
+    build: ./src/frontend/delivery_frontend
     container_name: delivery_frontend
     restart: unless-stopped
     depends_on:
@@ -95,7 +95,7 @@ services:
       - delivery_network
 
   admin_auth:
-    build: ./admin_auth
+    build: ./src/services/admin_auth
     container_name: admin_auth
     restart: unless-stopped
     depends_on:
@@ -104,7 +104,7 @@ services:
       - admin_network
 
   admin_frontend:
-    build: ./admin_frontend
+    build: ./src/frontend/admin_frontend
     container_name: admin_frontend
     restart: unless-stopped
     depends_on:
@@ -126,7 +126,7 @@ services:
       - admin_network
 
   main_frontend:
-    build: ./main_frontend
+    build: ./src/frontend/main_frontend
     container_name: main_frontend
     restart: unless-stopped
     networks:
@@ -136,8 +136,8 @@ services:
     image: caddy:2-alpine
     container_name: caddy
     volumes:
-      - ./caddy/data:/data
-      - ./caddy/config/Caddyfile:/etc/caddy/Caddyfile
+      - ./src/services/caddy/data:/data
+      - ./src/services/caddy/config/Caddyfile:/etc/caddy/Caddyfile
     depends_on:
       - user_auth
       - restaurant_auth
@@ -155,7 +155,7 @@ services:
     restart: unless-stopped
 
   user_prisma_studio:
-    build: ./user_auth
+    build: ./src/services/user_auth
     container_name: user_prisma_studio
     command: npx prisma studio --port 5555
     ports:
@@ -169,7 +169,7 @@ services:
     restart: unless-stopped
 
   restaurant_prisma_studio:
-    build: ./restaurant_auth
+    build: ./src/services/restaurant_auth
     container_name: restaurant_prisma_studio
     command: npx prisma studio --port 5555
     ports:
@@ -183,7 +183,7 @@ services:
     restart: unless-stopped
 
   delivery_prisma_studio:
-    build: ./delivery_auth
+    build: ./src/services/delivery_auth
     container_name: delivery_prisma_studio
     command: npx prisma studio --port 5555
     ports:
@@ -197,7 +197,7 @@ services:
     restart: unless-stopped
 
   admin_prisma_studio:
-    build: ./admin_auth
+    build: ./src/services/admin_auth
     container_name: admin_prisma_studio
     command: npx prisma studio --port 5555
     ports:
