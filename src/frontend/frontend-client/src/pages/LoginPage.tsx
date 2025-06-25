@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link,useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { User, Mail, Lock } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { Header } from '../components/Header'
-import logo from '../assets/Group.svg' 
-// adjust if path is different
+import logo from '../assets/Group.svg' // adjust if path is different
 export default function LoginPage() {
   const { login, register } = useAuth()
   const navigate = useNavigate()
@@ -53,7 +52,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-       <div className="flex-grow flex items-center justify-center">
+     <div className="flex-grow flex items-center justify-center">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="w-20 h-20 mx-auto mb-4">
