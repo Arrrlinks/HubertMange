@@ -1,0 +1,236 @@
+version: '3.9'
+
+services:
+  user_auth:
+    build: ./src/services/user_auth
+    container_name: user_auth
+    restart: unless-stopped
+    depends_on:
+      - user_db_auth
+    networks:
+      - user_network
+
+  user_frontend:
+    build: ./src/frontend/user_frontend
+    container_name: user_frontend
+    restart: unless-stopped
+    depends_on:
+      - user_db_auth
+    ports:
+      - "5180:5174"
+    networks:
+      - user_network
+
+  user_db_auth:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: user_db_auth
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_db
+    volumes:
+      - user_db_auth:/var/lib/postgresql/data
+    networks:
+      - user_network
+
+  restaurant_auth:
+    build: ./src/services/restaurant_auth
+    container_name: restaurant_auth
+    restart: unless-stopped
+    depends_on:
+      - restaurant_db_auth
+    networks:
+      - restaurant_network
+
+  restaurant_frontend:
+    build: ./src/frontend/restaurant_frontend
+    container_name: restaurant_frontend
+    restart: unless-stopped
+    depends_on:
+      - restaurant_db_auth
+    networks:
+      - restaurant_network
+
+  restaurant_db_auth:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: restaurant_db_auth
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: restaurant_db
+    volumes:
+      - restaurant_db_auth:/var/lib/postgresql/data
+    networks:
+      - restaurant_network
+
+  delivery_auth:
+    build: ./src/services/delivery_auth
+    container_name: delivery_auth
+    restart: unless-stopped
+    depends_on:
+      - delivery_db_auth
+    networks:
+      - delivery_network
+
+  delivery_frontend:
+    build: ./src/frontend/delivery_frontend
+    container_name: delivery_frontend
+    restart: unless-stopped
+    depends_on:
+      - delivery_db_auth
+    networks:
+      - delivery_network
+
+  delivery_db_auth:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: delivery_db_auth
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: delivery_db
+    volumes:
+      - delivery_db_auth:/var/lib/postgresql/data
+    networks:
+      - delivery_network
+
+  admin_auth:
+    build: ./src/services/admin_auth
+    container_name: admin_auth
+    restart: unless-stopped
+    depends_on:
+      - admin_db_auth
+    networks:
+      - admin_network
+
+  admin_frontend:
+    build: ./src/frontend/admin_frontend
+    container_name: admin_frontend
+    restart: unless-stopped
+    depends_on:
+      - admin_db_auth
+    networks:
+      - admin_network
+
+  admin_db_auth:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: admin_db_auth
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: admin_db
+    volumes:
+      - admin_db_auth:/var/lib/postgresql/data
+    networks:
+      - admin_network
+
+  main_frontend:
+    build: ./src/frontend/main_frontend
+    container_name: main_frontend
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    volumes:
+      - ./src/services/caddy/data:/data
+      - ./src/services/caddy/config/Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - user_auth
+      - restaurant_auth
+      - delivery_auth
+      - admin_auth
+      - main_frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app_network
+      - user_network
+      - restaurant_network
+      - delivery_network
+      - admin_network
+    restart: unless-stopped
+
+  user_prisma_studio:
+    build: ./src/services/user_auth
+    container_name: user_prisma_studio
+    command: npx prisma studio --port 5555
+    ports:
+      - "5000:5555"
+    depends_on:
+      - user_db_auth
+    environment:
+      DATABASE_URL: postgresql://user:password@user_db_auth:5432/user_db
+    networks:
+      - user_network
+    restart: unless-stopped
+
+  restaurant_prisma_studio:
+    build: ./src/services/restaurant_auth
+    container_name: restaurant_prisma_studio
+    command: npx prisma studio --port 5555
+    ports:
+      - "5001:5555"
+    depends_on:
+      - restaurant_db_auth
+    environment:
+      DATABASE_URL: postgresql://user:password@restaurant_db_auth:5432/restaurant_db
+    networks:
+      - restaurant_network
+    restart: unless-stopped
+
+  delivery_prisma_studio:
+    build: ./src/services/delivery_auth
+    container_name: delivery_prisma_studio
+    command: npx prisma studio --port 5555
+    ports:
+      - "5002:5555"
+    depends_on:
+      - delivery_db_auth
+    environment:
+      DATABASE_URL: postgresql://user:password@delivery_db_auth:5432/delivery_db
+    networks:
+      - delivery_network
+    restart: unless-stopped
+
+  admin_prisma_studio:
+    build: ./src/services/admin_auth
+    container_name: admin_prisma_studio
+    command: npx prisma studio --port 5555
+    ports:
+      - "5003:5555"
+    depends_on:
+      - admin_db_auth
+    environment:
+      DATABASE_URL: postgresql://user:password@admin_db_auth:5432/admin_db
+    networks:
+      - admin_network
+    restart: unless-stopped
+
+
+networks:
+  app_network:
+    driver: bridge
+  user_network:
+    driver: bridge
+  restaurant_network:
+    driver: bridge
+  delivery_network:
+    driver: bridge
+  admin_network:
+    driver: bridge
+
+volumes:
+  user_db_auth:
+    driver: local
+  restaurant_db_auth:
+    driver: local
+  delivery_db_auth:
+    driver: local
+  admin_db_auth:
+    driver: local
