@@ -35,8 +35,51 @@ exports.register = async (req, res) => {
                 password: hashedPassword
             }
         });
+        const user = await prisma.user.findUnique({where: {email}});
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({message: "Invalid credentials"});
+        }
 
-        return res.redirect(`/${userType}/login`);
+        const mathDate = Math.floor(Date.now() / 1000);
+        const accessTokenDuration = 7 * 24 * 60 * 60;
+        const refreshExpireTime = 7 * 24 * 60 * 60;
+
+        const jti = uuidv4();
+        refreshTokens.set(jti, user);
+
+        const accessToken = jwt.sign({
+            username: user.username,
+            email: user.email,
+            exp: Math.floor(Date.now() / 1000) + accessTokenDuration
+        }, ACCESS_SECRET);
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            sameSite: "Lax",
+            expires: new Date(mathDate * 1000 + accessTokenDuration * 1000)
+        });
+
+        const refreshToken = jwt.sign({
+            username: user.username,
+            email: user.email,
+            exp: Math.floor(Date.now() / 1000) + refreshExpireTime
+        }, process.env.REFRESH_JWT_KEY);
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            sameSite: "Lax",
+            expires: new Date(mathDate * 1000 + refreshExpireTime * 1000)
+        });
+        return res.status(200).json({
+            message: "Register successful",
+            accessToken,
+            refreshToken,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }
+        });
 
     } catch (error) {
         console.error("Registration error:", error);
@@ -46,7 +89,8 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const {username, password} = req.body;
+        const email = username;
 
         const user = await prisma.user.findUnique({where: {email}});
         if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -83,7 +127,16 @@ exports.login = async (req, res) => {
             sameSite: "Lax",
             expires: new Date(mathDate * 1000 + refreshExpireTime * 1000)
         });
-        return res.redirect(`/${userType}/`);
+        return res.status(200).json({
+            message: "Login successful",
+            accessToken,
+            refreshToken,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }
+        });
 
     } catch (error) {
         console.error("Login error:", error);
@@ -162,7 +215,14 @@ exports.auth_google_callback = async (req, res) => {
             expires: new Date(mathDate * 1000 + refreshExpireTime * 1000)
         });
 
-        return res.redirect("/");
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('user', {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        });
+
+        return res.redirect("/user/google/success");
 
     } catch (error) {
         console.error("Google auth error:", error);

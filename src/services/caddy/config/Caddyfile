@@ -27,21 +27,69 @@
 }
 
 :80 {
-    @userAuth path /user/login* /user/register* /user/auth/google* /user/auth/google/callback*
-    handle @userAuth {
+    @viteHMR {
+        header Connection *Upgrade*
+        header Upgrade websocket
+        path /
+    }
+    handle @viteHMR {
+        reverse_proxy user_frontend:5174
+    }
+
+    @viteRootAssets path /vite.svg /@vite/* /@react-refresh* /src/* /node_modules/*
+    handle @viteRootAssets {
+        reverse_proxy user_frontend:5174
+    }
+
+    @userLoginGet {
+        method GET
+        path /user/login
+    }
+    handle @userLoginGet {
+        reverse_proxy user_frontend:5174
+    }
+
+    @userLoginPost {
+        method POST
+        path /user/login
+    }
+    handle @userLoginPost {
         reverse_proxy user_auth:3000
         encode gzip zstd
     }
 
-    handle_path /user/* {
-        import user_auth
-        uri strip_prefix /user
-        reverse_proxy user_frontend:3000 {
-            header_up X-Set-Cookie {http.response.header.X-Set-Cookie}
-        }
+    @userRegisterGet {
+        method GET
+        path /user/register
+    }
+
+    handle @userRegisterGet {
+        reverse_proxy user_frontend:5174
+    }
+
+    @userRegisterPost {
+        method POST
+        path /user/register
+    }
+
+    handle @userRegisterPost {
+        reverse_proxy user_auth:3000
         encode gzip zstd
     }
 
+    @userPublic path /user/auth/google* /user/auth/google/callback*
+    handle @userPublic {
+        reverse_proxy user_auth:3000
+        encode gzip zstd
+    }
+
+    @userProtected path /user/*
+    handle @userProtected {
+        import user_auth
+        uri strip_prefix /user
+        reverse_proxy user_frontend:5174
+        encode gzip zstd
+    }
 
     @restaurantAuth path /restaurant/login* /restaurant/register* /restaurant/auth/google* /restaurant/auth/google/callback*
     handle @restaurantAuth {

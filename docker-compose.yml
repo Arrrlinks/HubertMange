@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     depends_on:
       - user_db_auth
+    ports:
+      - "5180:5174"
     networks:
       - user_network
 
