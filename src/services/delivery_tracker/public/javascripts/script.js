@@ -6,13 +6,44 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 let marker = null;
 let routeControl = null;
 let destinationMarker = null;
+let destinationCoords = null;
+let hasCentered = false; // Pour éviter de rezoomer à chaque mise à jour
 
-// Détecte si on est sur mobile
+// Détection mobile
 const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-// Destination stockée localement
-let destinationCoords = null;
+// Récupère l'adresse depuis l'URL (ex: ?address=Paris)
+const urlParams = new URLSearchParams(window.location.search);
+const address = urlParams.get("address");
 
+// Si adresse fournie => géocodage
+if (address) {
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+        .then(res => res.json())
+        .then(results => {
+            if (results.length === 0) {
+                alert("Adresse non trouvée.");
+                return;
+            }
+
+            const { lat, lon } = results[0];
+            const latNum = parseFloat(lat);
+            const lonNum = parseFloat(lon);
+            destinationCoords = { lat: latNum, lng: lonNum };
+
+            destinationMarker = L.marker([latNum, lonNum], {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [0, -41]
+                })
+            }).addTo(map).bindPopup("Destination").openPopup();
+        })
+        .catch(err => console.error("Erreur lors du géocodage :", err));
+}
+
+// Affiche l'itinéraire entre deux points
 function updateRoute(start, end) {
     if (routeControl) {
         map.removeControl(routeControl);
@@ -31,50 +62,35 @@ function updateRoute(start, end) {
         routeWhileDragging: false,
     }).addTo(map);
 
-    routeControl.getContainer().style.display = 'none'; // Cache le conteneur de la route
-
-    //setTimeout(() => map.invalidateSize(), 100); // Force la mise à jour de la carte
+    routeControl.getContainer().style.display = 'none'; // Cache les infos de trajet
 }
 
-function setDestination(lat, lng) {
-    destinationCoords = { lat, lng };
-
-    if (destinationMarker) {
-        destinationMarker.setLatLng([lat, lng]);
-    } else {
-        destinationMarker = L.marker([lat, lng], { icon: L.icon({
-                iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [0, -41]
-            }) }).addTo(map).bindPopup("Destination").openPopup();
-    }
-}
-
+// 📱 Cas mobile : géolocalisation en direct
 if (isMobile && "geolocation" in navigator) {
     navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude } = position.coords;
 
-            // Envoie la position au serveur
+            // Envoie au serveur
             fetch("/api/location", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ latitude, longitude }),
-            }).catch((err) => {
-                console.error("Erreur envoi position:", err);
-            });
+            }).catch((err) => console.error("Erreur envoi position:", err));
 
-            // Met à jour le marqueur local
+            // Met à jour le marqueur
             if (marker) {
                 marker.setLatLng([latitude, longitude]);
             } else {
                 marker = L.marker([latitude, longitude]).addTo(map);
             }
 
-            map.setView([latitude, longitude], 15);
+            // 👇 Ne centre qu'une seule fois (évite rezoom en boucle)
+            if (!hasCentered) {
+                map.setView([latitude, longitude], 15);
+                hasCentered = true;
+            }
 
-            // Affiche la route si destination connue
             if (destinationCoords) {
                 updateRoute({ lat: latitude, lng: longitude }, destinationCoords);
             }
@@ -88,27 +104,10 @@ if (isMobile && "geolocation" in navigator) {
             timeout: 10000,
         }
     );
+}
 
-    // Le mobile interroge le serveur toutes les 5 sec pour récupérer la destination
-    function fetchDestination() {
-        fetch("/api/destination")
-            .then(res => res.json())
-            .then(dest => {
-                if (dest.latitude && dest.longitude) {
-                    setDestination(dest.latitude, dest.longitude);
-                    if (marker) {
-                        const pos = marker.getLatLng();
-                        updateRoute({ lat: pos.lat, lng: pos.lng }, dest);
-                    }
-                }
-            })
-            .catch(err => console.error("Erreur récupération destination:", err));
-    }
-
-    setInterval(fetchDestination, 5000);
-} else {
-    // Partie ordinateur : récupération de la position + saisie destination
-
+// Cas ordinateur : lecture de la position depuis l’API (ex: dashboard)
+else {
     function updateLocation() {
         fetch("/api/location")
             .then((res) => res.json())
@@ -122,48 +121,18 @@ if (isMobile && "geolocation" in navigator) {
                     marker = L.marker([latitude, longitude]).addTo(map);
                 }
 
-                map.setView([latitude, longitude], 15);
+                if (!hasCentered) {
+                    map.setView([latitude, longitude], 15);
+                    hasCentered = true;
+                }
 
                 if (destinationCoords) {
                     updateRoute({ lat: latitude, lng: longitude }, destinationCoords);
                 }
             })
-            .catch((err) => {
-                console.error("Erreur récupération position:", err);
-            });
+            .catch((err) => console.error("Erreur récupération position:", err));
     }
 
-    setInterval(updateLocation, 5000);
     updateLocation();
-
-    // Formulaire pour saisir la destination
-    const form = document.getElementById("destination-form");
-    const input = document.getElementById("destination-input");
-
-    form?.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const address = input.value;
-        if (!address) return;
-
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
-            .then(res => res.json())
-            .then(results => {
-                if (results.length === 0) {
-                    alert("Adresse non trouvée.");
-                    return;
-                }
-                const { lat, lon } = results[0];
-                setDestination(parseFloat(lat), parseFloat(lon));
-
-                // Envoie la destination au serveur
-                fetch("/api/destination", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lon) }),
-                }).catch(err => console.error("Erreur envoi destination:", err));
-            })
-            .catch(err => {
-                console.error("Erreur géocodage:", err);
-            });
-    });
+    setInterval(updateLocation, 5000);
 }
