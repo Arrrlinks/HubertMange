@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Suivi GPS</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+  <style>
+    #map { height: 90vh; }
+    #destination-form {
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<% if (!/Mobi|Android/i.test(userAgent)) { %>
+  <form id="destination-form">
+    <input type="text" id="destination-input" placeholder="Saisir une adresse de destination" />
+    <button type="submit">Définir</button>
+  </form>
+<% } %>
+
+<div id="map"></div>
+
+<script src="/javascripts/script.js"></script>
+</body>
+</html>

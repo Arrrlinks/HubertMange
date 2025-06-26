@@ -1,0 +1,27 @@
+{
+  "name": "location-tracker-db",
+  "version": "1.0.0",
+  "description": "![2024-07-15](https://github.com/user-attachments/assets/51021220-d6c5-44fd-a08c-36061af891fe)",
+  "keywords": [],
+  "homepage": "https://github.com/Kshiti-24/Realtime-Location-Tracker#readme",
+  "bugs": {
+    "url": "https://github.com/Kshiti-24/Realtime-Location-Tracker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kshiti-24/Realtime-Location-Tracker.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "ngrok": "^5.0.0-beta.2",
+    "sqlite3": "^5.1.7"
+  }
+}
