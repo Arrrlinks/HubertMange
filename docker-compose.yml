@@ -5,6 +5,10 @@ services:
     build: ./src/services/user_auth
     container_name: user_auth
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://user:password@user_db_auth/user-db
+      - ACCESS_JWT_KEY=${ACCESS_JWT_KEY_USER:?}
+      - REFRESH_JWT_KEY=${REFRESH_JWT_KEY_USER:?}
     depends_on:
       - user_db_auth
     networks:
@@ -38,6 +42,10 @@ services:
     build: ./src/services/restaurant_auth
     container_name: restaurant_auth
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://user:password@restaurant_db_auth/restaurant-db
+      - ACCESS_JWT_KEY=${ACCESS_JWT_KEY_RESTAURANT:?}
+      - REFRESH_JWT_KEY=${REFRESH_JWT_KEY_RESTAURANT:?}
     depends_on:
       - restaurant_db_auth
     networks:
@@ -69,6 +77,10 @@ services:
     build: ./src/services/delivery_auth
     container_name: delivery_auth
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://user:password@delivery_db_auth/delivery-db
+      - ACCESS_JWT_KEY=${ACCESS_JWT_KEY_DELIVERY:?}
+      - REFRESH_JWT_KEY=${REFRESH_JWT_KEY_DELIVERY:?}
     depends_on:
       - delivery_db_auth
     networks:
@@ -100,6 +112,10 @@ services:
     build: ./src/services/admin_auth
     container_name: admin_auth
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://user:password@admin_db_auth/admin-db
+      - ACCESS_JWT_KEY=${ACCESS_JWT_KEY_ADMIN:?}
+      - REFRESH_JWT_KEY=${REFRESH_JWT_KEY_ADMIN:?}
     depends_on:
       - admin_db_auth
     networks:
